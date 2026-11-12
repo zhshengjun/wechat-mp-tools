@@ -1,4 +1,4 @@
-name: Build container images
+name: Build full container image
 
 on:
   workflow_dispatch:
@@ -19,16 +19,6 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - variant: lite
-            dockerfile: deploy/docker/Dockerfile
-            tag: latest
-          - variant: full
-            dockerfile: deploy/docker/Dockerfile.full
-            tag: full
     steps:
       - name: Check out upstream
         uses: actions/checkout@v4
@@ -52,19 +42,20 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and push ${{ matrix.variant }}
+      - name: Build and push full image
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: ${{ matrix.dockerfile }}
+          file: deploy/docker/Dockerfile.full
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
-            ${{ steps.meta.outputs.image }}:${{ matrix.tag }}
-            ${{ steps.meta.outputs.image }}:${{ matrix.variant }}-${{ steps.meta.outputs.revision }}
+            ${{ steps.meta.outputs.image }}:full
+            ${{ steps.meta.outputs.image }}:full-${{ steps.meta.outputs.revision }}
           labels: |
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
             org.opencontainers.image.revision=${{ steps.meta.outputs.revision }}
-            org.opencontainers.image.description=Container build of x554960766/wechat-mp-tools (${{ matrix.variant }})
-          cache-from: type=gha,scope=${{ matrix.variant }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.variant }}
+            org.opencontainers.image.description=Container build of x554960766/wechat-mp-tools (full)
+          cache-from: type=gha,scope=full
+          cache-to: type=gha,mode=max,scope=full
+
