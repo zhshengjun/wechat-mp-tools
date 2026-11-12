@@ -51,6 +51,7 @@ jobs:
           push: true
           tags: |
             ${{ steps.meta.outputs.image }}:full
+            ${{ steps.meta.outputs.image }}:latest
             ${{ steps.meta.outputs.image }}:full-${{ steps.meta.outputs.revision }}
           labels: |
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
